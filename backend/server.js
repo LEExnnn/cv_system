@@ -1,25 +1,29 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 // TODO: Import your favorite LLM SDK here (e.g., openai, @google/genai, etc.)
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || Math.floor(Math.random() * (65535 - 1024) + 1024);
 
 app.use(cors());
 app.use(express.json());
+
+// 静态托管前端页面
+app.use(express.static(path.join(__dirname, '../client')));
 
 // API Endpoint for AI suggestions
 app.post('/api/suggest', async (req, res) => {
     try {
         const { jd, currentHtml, userPrompt } = req.body;
-        
-        // TODO: Construct the prompt for the LLM
-        // Role: Top-tier resume modification expert and career planning expert.
-        // Task: Analyze the JD/userPrompt against the currentHtml.
-        // Provide constructive, optimal advice for improvement. Include specific changes.
         
         // Mock Response for now
         const mockResponse = {
@@ -27,7 +31,6 @@ app.post('/api/suggest', async (req, res) => {
             changes: [
                 {
                     description: "在项目A中增加效率提升的数据。",
-                    // In a real scenario, this might return JSON patches or the completely rewritten HTML part.
                     codeSnippet: "<li>主导重构核心交易链路，降低延迟 30%，提升吞吐量 50%。</li>" 
                 }
             ]
@@ -45,13 +48,7 @@ app.post('/api/suggest', async (req, res) => {
 app.post('/api/modify', async (req, res) => {
     try {
         const { currentHtml, acceptedChanges } = req.body;
-
-         // TODO: Construct the prompt for the LLM
-        // Ask it to apply the acceptedChanges to the currentHtml and return the FULL new HTML string.
-        
-        // Mock Response for now (just returning the current HTML with a tiny modification comment)
         const newHtml = `<!-- AI Modified Version at ${new Date().toISOString()} -->\n${currentHtml}`;
-
         res.json({ newHtml });
     } catch (error) {
         console.error("Error applying modifications:", error);
@@ -61,5 +58,5 @@ app.post('/api/modify', async (req, res) => {
 
 
 app.listen(port, () => {
-    console.log(`Backend server listening at http://localhost:${port}`);
+    console.log(`🚀 Backend server listening at http://localhost:${port}`);
 });
