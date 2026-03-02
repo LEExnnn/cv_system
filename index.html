@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 简历智能润色系统</title>
+    <!-- 引入代码编辑器 CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --bg-panel: #252526;
+            --border-color: #333;
+            --text-main: #d4d4d4;
+            --text-muted: #858585;
+            --accent: #007acc;
+            --accent-hover: #0098ff;
+            --danger: #f44336;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 顶部导航兰 */
+        header {
+            height: 50px;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            font-size: 16px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .header-actions button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+
+        .header-actions button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 主体三栏布局 */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 50px);
+        }
+
+        /* 左侧：AI 交互区 */
+        .panel-left {
+            width: 300px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            min-width: 250px;
+        }
+
+        /* 中间：代码编辑区 */
+        .panel-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        /* 右侧：预览区 */
+        .panel-right {
+            flex: 1;
+            background-color: #fff; /* 预览区底色为白 */
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 面板通用标题 */
+        .panel-header {
+            height: 35px;
+            background-color: #2d2d2d;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            user-select: none;
+        }
+
+        /* --- 左侧 AI 交互区样式 --- */
+        .ai-chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 10px;
+            border-radius: 6px;
+            word-wrap: break-word;
+        }
+
+        .msg-ai {
+            background-color: #37373d;
+            border-left: 3px solid var(--accent);
+        }
+
+        .msg-user {
+            background-color: #2b3a42;
+            align-self: flex-end;
+            border-right: 3px solid #4caf50;
+        }
+
+        .ai-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-panel);
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            background-color: #1e1e1e;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 4px;
+            resize: none;
+            font-family: inherit;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        textarea:focus {
+            outline: 1px solid var(--accent);
+            border-color: transparent;
+        }
+
+        .input-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: #3c3c3c;
+            color: var(--text-main);
+            border: 1px solid transparent;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn:hover { background-color: #4a4a4a; }
+        .btn-primary { background-color: var(--accent); color: white; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+
+        /* 建议操作按钮区域 */
+        .suggestion-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .suggestion-actions button {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+
+        /* --- 中间代码区样式 --- */
+        .code-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .CodeMirror {
+            height: 100%;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        /* --- 右侧预览区样式 --- */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #fff;
+        }
+        
+        /* 隐藏滚动条美化 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AI 简历智能润色系统</h1>
+        <div class="header-actions">
+            <!-- 历史版本选择下拉框暂放此处 -->
+            <select id="versionSelect" style="background:#3c3c3c; color:white; border:none; padding:5px; border-radius:4px; margin-right:10px; outline:none; font-size:12px;">
+                <option value="current">当前工作区</option>
+            </select>
+            <button onclick="saveVersion()">💾 保存版本</button>
+            <button onclick="exportHtml()">⬇️ 导出 HTML</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 左侧：AI 助手 -->
+        <div class="panel-left">
+            <div class="panel-header">AI 简历顾问</div>
+            
+            <div class="ai-chat-area" id="chatArea">
+                <div class="message msg-ai">
+                    您好，我是您的专属简历修改专家。请在下方输入您**目标岗位的 JD (岗位描述)**，或者直接告诉我您**想要修改的内容、排版风格**等诉求，我会为您提供专业的修改建议，并自动更新右侧的简历。
+                </div>
+            </div>
+
+            <div class="ai-input-area">
+                <textarea id="userInput" placeholder="输入岗位JD或您的修改要求..."></textarea>
+                <div class="input-actions">
+                    <button class="btn btn-primary" onclick="submitRequest()" id="submitBtn">发送请求 (⮐)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间：代码编辑器 -->
+        <div class="panel-center">
+            <div class="panel-header">HTML 源码编辑区 (<span id="statusText" style="color:#4caf50; margin-left:5px;">空闲</span>)</div>
+            <div class="code-container">
+                <textarea id="codeEditor"></textarea>
+            </div>
+        </div>
+
+        <!-- 右侧：实时预览 -->
+        <div class="panel-right">
+            <div class="panel-header" style="background-color: #f3f3f3; color: #333; border-bottom: 1px solid #ccc;">实时预览</div>
+            <iframe id="previewFrame"></iframe>
+        </div>
+    </div>
+
+    <!-- 引入 CodeMirror 脚本 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+
+    <script>
+        // --- 1. 初始化代码编辑器与预览 ---
+        let editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            mode: 'htmlmixed',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            lineWrapping: true,
+            autoCloseTags: true
+        });
+
+        const previewFrame = document.getElementById('previewFrame');
+
+        // 防抖函数，用于平滑更新预览
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, arguments), wait);
+            };
+        }
+
+        function updatePreview() {
+            const code = editor.getValue();
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            doc.open();
+            doc.write(code);
+            doc.close();
+            // 每次内容变更存一下临时缓存，防止刷新流失
+            localStorage.setItem('cv_temp_draft', code);
+        }
+
+        // 绑定编辑器内容变化事件
+        editor.on('change', debounce(updatePreview, 500));
+
+        // --- 2. 加载初始模板 ---
+        async function loadInitialTemplate() {
+            // 尝试从缓存加载
+            const draft = localStorage.getItem('cv_temp_draft');
+            if (draft) {
+                editor.setValue(draft);
+                return;
+            }
+            
+            // 没有缓存则加载本地文件 (由于跨域问题，这里直接从同目录获取，需通过http服务访问)
+            try {
+                const response = await fetch('./initial-template.html');
+                if(response.ok) {
+                    const html = await response.text();
+                    editor.setValue(html);
+                    saveVersion('初始版本', html); // 保存为第一个版本
+                } else {
+                     editor.setValue('<!-- 模板加载失败，请手动输入HTML -->');
+                }
+            } catch (e) {
+                console.error("加载模板失败", e);
+                // Fallback: 如果直接打开文件协议，fetch会失败，这里提供一个极简Fallback
+                 editor.setValue('<!DOCTYPE html>\n<html>\n<head>\n<title>前端服务未启动</title>\n</head>\n<body>\n<h1>请使用 HTTP 服务器运行此页面以加载完整模板，例如 npx http-server 或 Python 的 http.server。</h1>\n</body>\n</html>');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+             loadInitialTemplate();
+             loadVersionsMap();
+        });
+
+
+        // --- 3. AI 交互逻辑 ---
+        const chatArea = document.getElementById('chatArea');
+        const userInput = document.getElementById('userInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusText = document.getElementById('statusText');
+
+        // 支持快捷键发送
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitRequest();
+            }
+        });
+
+        function addMessage(text, isAi = false, actionsHtml = '') {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isAi ? 'msg-ai' : 'msg-user'}`;
+            // 简单处理加粗标记 (Markdown 适配)
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // 安全起见，这里应该使用 DOMPurify 等库，但原型阶段先直接设置
+            msgDiv.innerHTML = formattedText + actionsHtml;
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        async function submitRequest() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, false);
+            userInput.value = '';
+            submitBtn.disabled = true;
+            statusText.innerText = 'AI正在思考...';
+            statusText.style.color = '#ffeb3b';
+
+            try {
+                // TODO: 对接后端 API
+                // const currentHtml = editor.getValue();
+                // const response = await fetch('http://localhost:3000/api/suggest', { ... }); 
+                // const data = await response.json();
+
+                // 模拟 API 延迟和返回
+                setTimeout(() => {
+                    const mockSuggestion = "【分析结果】我已经分析了您的要求。当前的简历结构很好，如果针对高级工程师岗位，建议强化**项目数据指标**和**架构设计能力**的描述。您可以点击下方按钮，让我自动为您修改 HTML 代码。";
+                    
+                    const actionHtml = `
+                        <div class="suggestion-actions">
+                            <button class="btn btn-primary" onclick="applyAiChanges()">✓ 同意并自动修改</button>
+                            <button class="btn" onclick="addMessage('我不采用这个建议，请重新分析。', false)">✗ 拒绝</button>
+                        </div>
+                    `;
+                    
+                    addMessage(mockSuggestion, true, actionHtml);
+                    
+                    submitBtn.disabled = false;
+                    statusText.innerText = '等待确认...';
+                     statusText.style.color = '#fff';
+                }, 1500);
+
+            } catch (error) {
+                addMessage("请求失败，请检查后端服务是否启动。", true);
+                submitBtn.disabled = false;
+                statusText.innerText = '空闲';
+                statusText.style.color = '#4caf50';
+            }
+        }
+
+        // 执行 AI 的代码修改
+        window.applyAiChanges = function() {
+            // 禁用按钮防多次点击
+            event.target.disabled = true;
+            event.target.innerText = '修改中...';
+            statusText.innerText = '正在应用代码...';
+            statusText.style.color = '#2196f3';
+
+            setTimeout(() => {
+                const currentHtml = editor.getValue();
+                // 模拟 AI 修改后的代码 (在 <div class="summary"> 中插入一段)
+                const newContent = currentHtml.replace(
+                    /<\/div>\s*<\/section>/, 
+                    '</div>\n        </section>\n        <!-- AI 新增模块 -->\n        <section>\n            <h2>核心优势 / Core Competencies</h2>\n            <ul>\n                <li>深入理解 V8 引擎底层架构，曾在项目中主导优化内存泄漏问题，提升页面运行帧率。</li>\n                <li>具备强大的架构拆解能力，主导过从单体架构向微服务模块化演进的全量推演。</li>\n            </ul>\n        </section>'
+                );
+                
+                // 将旧版本自动保存
+                saveVersion('AI修改前备份');
+
+                // 更新编辑器
+                editor.setValue(newContent);
+                
+                addMessage("修改已完成，并在右侧实时渲染。您可以审查 HTML 源码，或告诉我还需要调整哪里。", true);
+                
+                statusText.innerText = '空闲';
+                statusText.style.color = '#4caf50';
+            }, 1000);
+        }
+
+        // --- 4. 历史版本管理 (LocalStorage 简易实现) ---
+        function saveVersion(customName = null, content = null) {
+            const htmlToSave = content || editor.getValue();
+            const timestamp = new Date().toISOString();
+            const name = customName || `版本 - ${new Date().toLocaleTimeString()}`;
+            
+            const versionData = {
+                id: 'v_' + new Date().getTime(),
+                name: name,
+                time: timestamp,
+                html: htmlToSave
+            };
+
+            let versions = JSON.parse(localStorage.getItem('cv_versions') || '[]');
+            versions.push(versionData);
+            
+            // 最多保留 20 个版本
+            if(versions.length > 20) versions.shift();
+            
+            localStorage.setItem('cv_versions', JSON.stringify(versions));
+            
+            // 如果是用户点击保存按钮触发的，给个提示
+            if (!customName && !content) {
+                alert(`已保存: ${name}`);
+            }
+            loadVersionsMap();
+        }
+
+        function loadVersionsMap() {
+            const select = document.getElementById('versionSelect');
+            // 保留第一个选项
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            const versions = JSON.parse(localStorage.getItem('cv_versions') || '[]');
+            // 倒序展示，最新的在上面
+            [...versions].reverse().forEach(v => {
+                const option = document.createElement('option');
+                option.value = v.id;
+                option.text = v.name;
+                select.appendChild(option);
+            });
+        }
+
+        // 监听版本切换
+        document.getElementById('versionSelect').addEventListener('change', function(e) {
+            const val = e.target.value;
+            if (val === 'current') return;
+
+            const versions = JSON.parse(localStorage.getItem('cv_versions') || '[]');
+            const targetVersion = versions.find(v => v.id === val);
+            if (targetVersion) {
+                // 切换前先存一下当前草稿
+                 localStorage.setItem('cv_temp_draft', editor.getValue());
+                 editor.setValue(targetVersion.html);
+                 addMessage(`已回滚至版本: **${targetVersion.name}**`, true);
+            }
+            // 自动重置下拉框回"当前工作区"
+             e.target.value = 'current';
+        });
+
+        // --- 5. 导出功能 ---
+        window.exportHtml = function() {
+            const content = editor.getValue();
+            const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `简历_${new Date().toISOString().slice(0,10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+    </script>
+</body>
+</html>

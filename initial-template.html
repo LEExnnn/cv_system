@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简历 - {姓名}</title>
+    <!-- Professional Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深空灰蓝 */
+            --accent-color: #34495e; /* 次级重点色 */
+            --text-main: #333333;
+            --text-secondary: #666666;
+            --bg-color: #ffffff;
+            --line-color: #eaeaea;
+            --font-serif: 'Noto Serif SC', serif;
+            --font-sans: 'Roboto', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background-color: #f7f9fa; /* 模拟阅读体验的微灰背景 */
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .resume-container {
+            max-width: 900px; /* A4 比例近似宽度 */
+            margin: 0 auto;
+            background-color: var(--bg-color);
+            padding: 50px 60px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 高级感的阴影 */
+            box-sizing: border-box;
+        }
+
+        /* 头部信息 */
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+        }
+
+        .contact-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contact-info span {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 模块通用样式 */
+        section {
+            margin-bottom: 35px;
+        }
+
+        h2 {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 个人总结 */
+        .summary {
+            font-size: 15px;
+            text-align: justify;
+        }
+
+        /* 经历项容器 */
+        .experience-item {
+            margin-bottom: 25px;
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .experience-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-main);
+        }
+
+        .experience-company {
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--accent-color);
+            font-style: italic;
+        }
+
+        .experience-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* 列表样式 */
+        ul {
+            margin-top: 5px;
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+
+        li {
+            font-size: 14.5px;
+            margin-bottom: 8px;
+            text-align: justify;
+            position: relative;
+            list-style-type: disc; /* 使用标准圆点 */
+            color: var(--text-main);
+        }
+
+        /* 技能部分特殊样式 */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .skill-group {
+            flex: 1 1 45%; /* 大致两列布局 */
+        }
+
+        .skill-group strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .skill-group p {
+            margin: 0;
+            font-size: 14.5px;
+        }
+
+        /* 响应式调整 (针对窄屏预览) */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .resume-container { padding: 30px 20px; }
+            .experience-header { flex-direction: column; }
+            .experience-date { margin-top: 5px; }
+            .skill-group { flex: 1 1 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="resume-container">
+        <!-- 头部信息 -->
+        <header>
+            <h1>有方 (Your Name)</h1>
+            <div class="contact-info">
+                <span>📍 城市, 国家</span>
+                <span>📞 +86 1XX XXXX XXXX</span>
+                <span>✉️ email@example.com</span>
+                <span>🔗 github.com/yourprofile</span>
+            </div>
+        </header>
+
+        <!-- 个人总结 (专业概览) -->
+        <section>
+            <h2>个人总结 / Professional Summary</h2>
+            <div class="summary">
+                <p>具有五年以上经验的资深研发工程师/产品经理，专注于前沿 AI 技术的落地与自动化系统构建。熟练掌握大语言模型应用开发，倡导 Vibe Coding 与直觉驱动的工程实践。拥有从架构设计到产品交付的全栈能力，致力于探索人工智能的边界并解决复杂业务场景。</p>
+            </div>
+        </section>
+
+        <!-- 工作经历 -->
+        <section>
+            <h2>工作经历 / Work Experience</h2>
+            
+            <div class="experience-item">
+                <div class="experience-header">
+                    <span class="experience-title">高级 AI 研发工程师</span>
+                    <span class="experience-company">某知名科技企业, 北京</span>
+                    <span class="experience-date">2023年03月 – 至今</span>
+                </div>
+                <ul>
+                    <li>主导设计并研发智能协同工作流系统，整合多个大语言模型能力，日均处理超万次复杂推理请求。</li>
+                    <li>设计微服务架构，优化核心算法模块性能，使系统响应时间缩短了 40%。</li>
+                    <li>推动 Vibe Coding 理念的团队实践，搭建内部 AI 辅助编程平台，整体研发效率提升 30%。</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <div class="experience-header">
+                    <span class="experience-title">软件工程师 / 产品经理</span>
+                    <span class="experience-company">某创新初创公司, 上海</span>
+                    <span class="experience-date">2020年07月 – 2023年02月</span>
+                </div>
+                <ul>
+                    <li>负责核心 SaaS 产品的后端开发与迭代，处理高并发数据流，保障 99.9% 的系统可用性。</li>
+                    <li>兼任产品经理角色，完成用户需求调研，梳理并撰写详细的 PRD，协调前端与设计团队按时交付。</li>
+                    <li>构建自动化测试及 CI/CD 流程，显著降低了线上 Bug 发生率。</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 项目经验 -->
+        <section>
+            <h2>项目经验 / Project Experience</h2>
+            
+            <div class="experience-item">
+                <div class="experience-header">
+                    <span class="experience-title">基于本地大模型的智能助手框架</span>
+                    <span class="experience-date">2025年06月 – 2025年12月</span>
+                </div>
+                <ul>
+                    <li>**项目描述:** 独立构建的开源项目，旨在为开发者提供一个轻量级、可本地部署、支持多 Agent 协同工作的系统框架。</li>
+                    <li>**核心职责:** 负责底层通信协议设计、任务分发路由及内存管理模块。</li>
+                    <li>**技术突破:** 实现了不同领域 Agent (如 Coder 和 PM) 之间的状态共享与指令传递机制。</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 技能专长 -->
+        <section>
+            <h2>专业技能 / Skills</h2>
+            <div class="skills-container">
+                <div class="skill-group">
+                    <strong>编程语言</strong>
+                    <p>JavaScript/TypeScript, Python, Java, HTML/CSS</p>
+                </div>
+                <div class="skill-group">
+                    <strong>AI与大模型应用</strong>
+                    <p>Prompt Engineering, LangChain, 检索增强生成 (RAG), OpenAI API, 本地化部署 (Ollama)</p>
+                </div>
+                <div class="skill-group">
+                    <strong>后端框架与工具</strong>
+                    <p>Node.js, Express, Spring Boot, MySQL, Redis, Docker, Git</p>
+                </div>
+                <div class="skill-group">
+                    <strong>产品与工程能力</strong>
+                    <p>需求分析, 架构设计, 持续集成/持续部署 (CI/CD), 敏捷开发</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 教育背景 -->
+        <section>
+            <h2>教育背景 / Education</h2>
+            <div class="experience-item">
+                <div class="experience-header">
+                    <span class="experience-title">计算机科学与技术 (本科)</span>
+                    <span class="experience-company">某重点大学</span>
+                    <span class="experience-date">2016年09月 – 2020年06月</span>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>
